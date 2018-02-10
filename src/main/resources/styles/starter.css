@@ -1,0 +1,15 @@
+.rechner {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+}
+
+.input-field {
+    width: 150px;
+}
+
+.value {
+    margin-left: 5px;
+    margin-right: 5px;
+}
+

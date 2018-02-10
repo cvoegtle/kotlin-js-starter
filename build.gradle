@@ -1,0 +1,56 @@
+group = "org.voegtle.4gw"
+version = "0.1"
+
+buildscript {
+    ext.kotlin_version = '1.2.21'
+    ext.kotlinx_html_version = "0.6.8"
+
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlin_version}"
+    }
+}
+
+apply plugin: 'kotlin2js'
+
+repositories {
+    jcenter()    // Bintray's repository - a fast Maven Central mirror & more
+    mavenCentral()
+}
+
+dependencies {
+    // include for client-side
+    compile "org.jetbrains.kotlinx:kotlinx-html-js:${kotlinx_html_version}"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-js:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlin_version"
+}
+
+compileKotlin2Js {
+    kotlinOptions.outputFile = "${projectDir}/web/starter.js"
+    kotlinOptions.moduleKind = "umd"
+    kotlinOptions.sourceMap = true
+}
+
+task copyTask(type: Copy) {
+    from("${projectDir}/src/main/resources")
+    into("${projectDir}/web")
+}
+
+task assembleWeb(type: Sync) {
+    configurations.compile.each { File file ->
+        from(zipTree(file.absolutePath), {
+            includeEmptyDirs = false
+            include { fileTreeElement ->
+                def path = fileTreeElement.path
+                path.endsWith(".js") && (path.startsWith("META-INF/resources/") ||
+                        !path.startsWith("META-INF/"))
+            }
+        })
+    }
+    into "${projectDir}/web"
+}
+
+assemble.dependsOn copyTask
+assemble.dependsOn assembleWeb
